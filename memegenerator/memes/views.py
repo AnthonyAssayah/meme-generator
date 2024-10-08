@@ -1,10 +1,28 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from .models import Meme
-from .serializers import MemeSerializer
+from .models import Meme, MemeTemplate
+from .serializers import MemeSerializer, MemeTemplateSerializer
 
 
+class MemeTemplateViewSet(viewsets.ModelViewSet):
+    queryset = MemeTemplate.objects.all()
+    serializer_class = MemeTemplateSerializer
+
+    # GET /api/templates/ - List all meme templates
+    def list(self, request):
+        queryset = self.get_queryset()
+        serializer = MemeTemplateSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    # POST /api/templates/ - Create a new meme template
+    def create(self, request):
+        serializer = MemeTemplateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+    
 class MemeViewSet(viewsets.ModelViewSet):
     queryset = Meme.objects.all()
     serializer_class = MemeSerializer
