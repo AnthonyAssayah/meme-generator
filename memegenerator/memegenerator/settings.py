@@ -77,12 +77,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'memegenerator_db',
-        'USER': 'your_postgres_user',
-        'PASSWORD': 'your_postgres_password',
+        'USER': 'anthony_postgre',
+        'PASSWORD': 'Assayah19',
         'HOST': 'localhost',
         'PORT': '5432',
     }
 }
+
 
 
 # Password validation
