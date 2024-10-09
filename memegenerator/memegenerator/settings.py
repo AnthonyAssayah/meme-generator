@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'memes',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -51,6 +52,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+     
+    ]
+}
 
 ROOT_URLCONF = 'memegenerator.urls'
 
