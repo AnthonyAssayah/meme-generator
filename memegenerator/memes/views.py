@@ -28,8 +28,8 @@ class MemeTemplateViewSet(viewsets.ModelViewSet):
         serializer = MemeTemplateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status.HTTP_201_CREATED)
+        return Response(serializer.errors,status.HTTP_400_BAD_REQUEST)
     
     
 class MemeViewSet(viewsets.ModelViewSet):
@@ -54,8 +54,8 @@ class MemeViewSet(viewsets.ModelViewSet):
         serializer = MemeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
     # GET /api/memes/<id>/ - Retrieve a specific meme
@@ -72,7 +72,7 @@ class MemeViewSet(viewsets.ModelViewSet):
         rating = request.data.get('rating')
 
         if not (1 <= rating <= 5):
-            return Response({"error": "Rating must be between 1 and 5"}, status=400)
+            return Response({"error": "Rating must be between 1 and 5"}, status=status.HTTP_400_BAD_REQUEST)
 
         user_rating = meme.ratings.filter(user=request.user)
         if user_rating.exists():
@@ -80,7 +80,11 @@ class MemeViewSet(viewsets.ModelViewSet):
         else:
             meme.ratings.create(user=request.user, score=rating)
         
-        return Response({'status': 'rated'})
+        return Response({
+                    'status': 'rated successfully',
+                    'meme_id': meme.id,
+                    'rating': rating
+            }, status=status.HTTP_200_OK)
     
     
     # GET /api/memes/random/ - Get a random meme
@@ -98,10 +102,19 @@ class MemeViewSet(viewsets.ModelViewSet):
     def get_top_rated_memes(self, request):
         # Calculate the average rating for each meme
         top_memes = Meme.objects.annotate(avg_rating=Avg('ratings__score')).order_by('-avg_rating')[:10]
+        
+        # Check if we have fewer than 10 memes
+        if top_memes.count() < 10:
+            return Response({
+                'message': f'There are only {top_memes.count()} memes available.',
+                'data': MemeSerializer(top_memes, many=True).data
+            }, status=status.HTTP_200_OK)
+            
         serializer = MemeSerializer(top_memes, many=True)
         return Response(serializer.data)
     
-    
+
+### This class was not require - juts implement it for debugging to check the ratings.
 class RatingViewSet(viewsets.ViewSet):
     authentication_classes = [TokenAuthentication]
     serializer_class = RatingSerializer
