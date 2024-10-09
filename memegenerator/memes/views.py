@@ -101,7 +101,7 @@ class MemeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='top')
     def get_top_rated_memes(self, request):
         # Calculate the average rating for each meme
-        top_memes = Meme.objects.annotate(avg_rating=Avg('ratings__score')).order_by('-avg_rating')[:10]
+        top_memes = Meme.objects.annotate(avg_rating=Avg('ratings__score')).filter(avg_rating__isnull=False).order_by('-avg_rating')[:10]
         
         # Check if we have fewer than 10 memes
         if top_memes.count() < 10:
