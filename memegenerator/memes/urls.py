@@ -5,8 +5,8 @@ from .views import MemeViewSet, MemeTemplateViewSet, RatingViewSet
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
-router.register(r'memes', MemeViewSet)
-router.register(r'templates', MemeTemplateViewSet)
+router.register(r'memes', MemeViewSet, basename='meme')
+router.register(r'templates', MemeTemplateViewSet, basename='template')
 router.register(r'ratings', RatingViewSet)
 
 
