@@ -337,3 +337,46 @@ class MemeAPIViewsTest(TestCase):
         self.assertEqual(Rating.objects.count(), 1)  
         self.assertEqual(Rating.objects.first().score, 4)  # Rating should now be 4
 
+
+    # Test for GET /api/memes/random/ (Get a random meme)
+    def test_random_meme(self):
+        url = reverse('meme-get-random-meme')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('id', response.data)  # Should return a meme with an 'id' field
+        
+    # Test for GET /api/memes/random/ when no memes exist
+    def test_random_meme_no_memes(self):
+        # Clear all memes
+        Meme.objects.all().delete()
+        
+        url = reverse('meme-get-random-meme')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['error'], 'No memes found')
+    
+    # Test for GET /api/memes/random/ to ensure randomness
+    def test_random_meme_randomness(self):
+        Meme.objects.create( template=self.template1,
+                            top_text="Custom Top Text 1",
+                            bottom_text="Custom Bottom Text 1",
+                            created_by=self.user1)
+        Meme.objects.create( template=self.template2,
+                            top_text="Custom Top Text 2",
+                            bottom_text="Custom Bottom Text 2",
+                            created_by=self.user2)
+        Meme.objects.create( template=self.template3,
+                            top_text="Custom Top Text 3",
+                            bottom_text="Custom Bottom Text 3",
+                            created_by=self.user2)
+
+        url = reverse('meme-get-random-meme')
+        
+        response1 = self.client.get(url)
+        meme_id_1 = response1.data['id']
+        response2 = self.client.get(url)
+        meme_id_2 = response2.data['id']
+        
+        # Check that the two responses are different (high probability)
+        self.assertNotEqual(meme_id_1, meme_id_2)
+
