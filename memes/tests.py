@@ -11,6 +11,7 @@ class MemeAPIViewsTest(TestCase):
         # Create users
         self.user1 = User.objects.create_user(username='user1', password='password1')
         self.user2 = User.objects.create_user(username='user2', password='password2')
+        self.user3 = User.objects.create_user(username='user3', password='password3')
 
           # Create meme templates
         self.template1 = MemeTemplate.objects.create(
@@ -45,6 +46,12 @@ class MemeAPIViewsTest(TestCase):
             bottom_text="Custom Bottom Text 2",
             created_by=self.user2
         )
+        self.meme3 = Meme.objects.create(
+            template=self.template3,
+            top_text="Custom Top Text 3",
+            bottom_text="Custom Bottom Text 3",
+            created_by=self.user3
+        )
         
     # Test for GET /api/templates/ (List all meme templates)
     def test_list_templates(self):
@@ -58,7 +65,7 @@ class MemeAPIViewsTest(TestCase):
     
     # Edge case: No templates available
     def test_list_templates_empty(self):
-        MemeTemplate.objects.all().delete()  # Delete all templates
+        MemeTemplate.objects.all().delete()  
         url = reverse('template-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -91,7 +98,7 @@ class MemeAPIViewsTest(TestCase):
 
     # Edge case: no meme avaliables 
     def test_list_memes_empty(self):
-        Meme.objects.all().delete()  # Delete all memes 
+        Meme.objects.all().delete() 
         url = reverse('meme-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -102,7 +109,7 @@ class MemeAPIViewsTest(TestCase):
     def test_list_memes_pagination(self):
         url = reverse('meme-list')
         # Assuming pagination is set to 2 per page
-        for i in range(5):  # Create 5 memes
+        for i in range(5): 
             Meme.objects.create(
                 template=self.template1, top_text=f"Top {i}", bottom_text=f"Bottom {i}", created_by=self.user1
             )
@@ -144,7 +151,7 @@ class MemeAPIViewsTest(TestCase):
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Meme.objects.count(), 3)  # Should now have 3 memes
+        self.assertEqual(Meme.objects.count(), 4)  # Should now have 3 memes
         
         url2 = reverse('template-list')
         data2 = {
@@ -357,18 +364,11 @@ class MemeAPIViewsTest(TestCase):
     
     # Test for GET /api/memes/random/ to ensure randomness
     def test_random_meme_randomness(self):
-        Meme.objects.create( template=self.template1,
-                            top_text="Custom Top Text 1",
-                            bottom_text="Custom Bottom Text 1",
-                            created_by=self.user1)
-        Meme.objects.create( template=self.template2,
-                            top_text="Custom Top Text 2",
-                            bottom_text="Custom Bottom Text 2",
-                            created_by=self.user2)
-        Meme.objects.create( template=self.template3,
-                            top_text="Custom Top Text 3",
-                            bottom_text="Custom Bottom Text 3",
-                            created_by=self.user2)
+        
+        for i in range(40):
+            Meme.objects.create(
+                template=self.template1, top_text=f"Top {i}", bottom_text=f"Bottom {i}", created_by=self.user1
+            )
 
         url = reverse('meme-get-random-meme')
         
@@ -376,7 +376,72 @@ class MemeAPIViewsTest(TestCase):
         meme_id_1 = response1.data['id']
         response2 = self.client.get(url)
         meme_id_2 = response2.data['id']
-        
+       
         # Check that the two responses are different (high probability)
         self.assertNotEqual(meme_id_1, meme_id_2)
 
+
+
+    # Rate meme helper function for top 10 rated memes
+    def rate_meme_for_test(self, meme_id, score, user):
+        url = reverse('meme-rate-meme', args=[meme_id])  
+        data = {'rating': score}
+
+        # Retrieve token for the given user
+        token = Token.objects.get(user=user)
+        client = APIClient()
+
+        # Set the authorization header with the token
+        client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        response = client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(Rating.objects.filter(meme_id=meme_id, user=user).count(), 1)
+
+    # Test for GET /api/memes/top/ (Get top 10 rated memes)
+    def test_top_rated_memes(self):
+      
+        self.rate_meme_for_test(self.meme1.id, 5, self.user1)  
+        self.rate_meme_for_test(self.meme2.id, 4, self.user2) 
+        self.rate_meme_for_test(self.meme3.id, 3, self.user1) 
+
+        top_rated_url = reverse('meme-get-top-rated-memes')
+        response = self.client.get(top_rated_url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, dict)  
+        self.assertGreaterEqual(len(response.data['data']), 3)  # Should return at least 3 memes
+        self.assertEqual(response.data['data'][0]['id'], self.meme1.id)
+  
+    # Test with multiple users rating memes
+    def test_top_rated_memes_multiple_users(self):
+   
+        self.rate_meme_for_test(self.meme1.id, 5, self.user1)  
+        self.rate_meme_for_test(self.meme1.id, 3, self.user2) 
+        self.rate_meme_for_test(self.meme2.id, 4, self.user1)  
+        self.rate_meme_for_test(self.meme2.id, 5, self.user2)  
+        self.rate_meme_for_test(self.meme3.id, 2, self.user1)  
+
+        top_rated_url = reverse('meme-get-top-rated-memes')
+        response = self.client.get(top_rated_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, dict)
+
+        # The first meme should be meme2 because it received the highest rating (average score of 4.5)
+        self.assertEqual(response.data['data'][0]['id'], self.meme2.id)
+        # The second meme should be meme1 (average score of 4)
+        self.assertEqual(response.data['data'][1]['id'], self.meme1.id)
+        # The third meme should be meme3 (score of 2)
+        self.assertEqual(response.data['data'][2]['id'], self.meme3.id)
+
+
+    # Test when no Ratings exist for memes
+    def test_top_rated_memes_no_ratings(self):
+     
+        top_rated_url = reverse('meme-get-top-rated-memes')
+        response = self.client.get(top_rated_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response.data, dict)
+        self.assertEqual(len(response.data['data']), 0)  # No memes should be returned as no ratings exist
