@@ -7,7 +7,7 @@ from .views import MemeViewSet, MemeTemplateViewSet, RatingViewSet
 router = DefaultRouter()
 router.register(r'memes', MemeViewSet, basename='meme')
 router.register(r'templates', MemeTemplateViewSet, basename='template')
-router.register(r'ratings', RatingViewSet)
+router.register(r'ratings', RatingViewSet, basename='rating')
 
 
 urlpatterns = [
