@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire Django project into the container
 COPY . /app/
 
-# Set environment variables (useful for debugging or configuring Django settings)
+# Set environment variables 
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=memegenerator.settings
 
