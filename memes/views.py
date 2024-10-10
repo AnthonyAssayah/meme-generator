@@ -10,6 +10,7 @@ from django.db.models import Avg
 from .models import Meme, MemeTemplate, Rating
 from .serializers import MemeSerializer, MemeTemplateSerializer, RatingSerializer
 
+from random import choice
 
 
 class MemeTemplateViewSet(viewsets.ModelViewSet):
@@ -117,6 +118,32 @@ class MemeViewSet(viewsets.ModelViewSet):
             
         serializer = MemeSerializer(top_memes, many=True)
         return Response(serializer.data)
+    
+    ## Bonus endpoint
+     # GET /api/memes/surprise-me/ - Get a random meme with random funny text
+    @action(detail=False, methods=['get'], url_path='surprise-me')
+    def surprise_me(self, request):
+        random_meme = Meme.objects.order_by('?').first()  # Get a random meme
+        funny_phrases = [
+            "Keep calm and let Django handle the rest.",
+            "Python: I speak your language, but Django makes me fluent.",
+            "Django: Turning Python into web magic since day one.",
+            "If it ain't Django, it ain't worth the hassle.",
+            "Life’s too short for bad frameworks. Choose Django.",
+            "Coding in Python, but my heart belongs to Django.",
+            "Django: Making web development as easy as Python pie.",
+            "Django - because reinventing the wheel is overrated.",
+            "Python without Django is like coffee without caffeine.",
+            "In Django we trust, the rest is just syntax."
+        ]
+
+        if random_meme:
+            serializer = MemeSerializer(random_meme)
+            return Response({
+                'meme': serializer.data,
+                'funny_text': choice(funny_phrases)  # Select a random funny phrase
+            })
+        return Response({"error": "No memes found"}, status=status.HTTP_404_NOT_FOUND)
     
 
 ### This class was not require - juts implement it for debugging to check the ratings.
