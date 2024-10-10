@@ -70,6 +70,11 @@ class MemeViewSet(viewsets.ModelViewSet):
     def rate_meme(self, request, pk=None):
         meme = self.get_object()
         rating = request.data.get('rating')
+        
+        try:
+            rating = int(rating) 
+        except (ValueError, TypeError):
+            return Response({"error": "Invalid rating format"}, status=status.HTTP_400_BAD_REQUEST)
 
         if not (1 <= rating <= 5):
             return Response({"error": "Rating must be between 1 and 5"}, status=status.HTTP_400_BAD_REQUEST)
