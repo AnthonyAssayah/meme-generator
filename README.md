@@ -80,12 +80,13 @@ You can also interact with the Meme Generator API using ```curl``` commands dire
   - for rate a meme: ```docker exec -it meme-generator-web-1 curl -X POST http://localhost:8000/api/memes/4/rate/ -H "Content-Type: application/json" -H "Authorization: Token a4a9644c7b8ab4540a34fc80e501e494707b89c4" -d "{\"rating\": 5}"```
   - for get a random meme: ```docker exec -it meme-generator-web-1 curl -X GET http://localhost:8000/api/memes/random/```
  
-  While inside the Docker environment, you can run the automated tests for the Meme Generator API using the following command:
+While inside the Docker environment, you can run the automated tests for the Meme Generator API using the following command:
       ``` docker-compose exec web python manage.py test ```
 
- 
+ You can create a superuser by running: ```docker-compose exec web python manage.py createsuperuser```.
+ After creating the superuser, access the Django admin panel at http://127.0.0.1:8000/admin. Here, you can view all data, users, and perform administrative tasks. Additionally, you can retrieve your authentication **token** to perform actions via the API.
 
-    ## File Structure
+ ## File Structure
 
 Within the download you'll find the following directories and files:
 
