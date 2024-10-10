@@ -131,4 +131,95 @@ class MemeAPIViewsTest(TestCase):
             self.assertIn('created_at', meme)
 
 
+    # Test for POST /api/memes/ (Create a new meme) - POST /api/templates/ (Create a new memeTemplate)
+    def test_create_meme_and_memeTemplate(self):
+        url = reverse('meme-list')
+        data = {
+            'template': self.template1.id,
+            'top_text': 'New Top Text',
+            'bottom_text': 'New Bottom Text',
+            'created_by': self.user1.id
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Meme.objects.count(), 3)  # Should now have 3 memes
+        
+        url2 = reverse('template-list')
+        data2 = {
+            'name': "Template 4",
+            'image_url': "https://example.com/template4.jpg",
+            'default_top_text': "Top Text 4",
+            'default_bottom_text': "Bottom Text 4"
+        }
+        response2 = self.client.post(url2, data2, format='json')
+        self.assertEqual(response2.status_code, status.HTTP_201_CREATED)
+    
+    # Test creating meme without required fields 
+    def test_create_meme_missing_required_fields(self):
+        url = reverse('meme-list')
+        data = {
+            'template': self.template1.id,
+            'bottom_text': 'New Bottom Text',
+            'top_text': 'New Top Text',
+            # Missing required 'created_by'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    
+    
+    # Test creating template without required fields  
+    def test_create_template_missing_required_fields(self):
+        url = reverse('template-list')
+        data = {
+            'url': 'http://example.com/template.jpg',  # Missing 'name'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('name', response.data)  # Error for missing field
+        
+        
+    # Test for invalid template ID and user ID
+    def test_create_meme_invalid_fields(self):
+        url = reverse('meme-list')
+        data = {
+            'template': 9999,  # Non-existent template ID
+            'top_text': 'Invalid Template',
+            'bottom_text': 'Invalid Template',
+            'created_by': self.user1.id
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('template', response.data)  # Error message for invalid template
+        
+        data1 = {
+            'template': self.template1.id,
+            'top_text': 'Invalid User',
+            'bottom_text': 'Invalid User',
+            'created_by': 9999  # Non-existent user ID
+        }
+        response1 = self.client.post(url, data1, format='json')
+        self.assertEqual(response1.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('created_by', response1.data)  # Error message for invalid user ID
+    
+    
+    # Test for invalid json format
+    def test_create_meme_invalid_json_format(self):
+        url = reverse('meme-list')
+        invalid_data = 'Invalid JSON data'
+        response = self.client.post(url, invalid_data, content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('detail', response.data)  # Generic error for bad request
+
+
+    # Test creating template with existing url
+    def test_create_template_duplicate_url(self):
+        url = reverse('template-list')
+        data = {
+            'name': 'Duplicate URL Template',
+            'image_url': self.template1.image_url,  # Use the same URL as an existing template
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)  
+
+
     
