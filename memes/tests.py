@@ -86,4 +86,49 @@ class MemeAPIViewsTest(TestCase):
         self.assertEqual(len(response.data), 4)  
         self.assertEqual(response.data['results'][0]['top_text'], self.meme1.top_text)
 
+
+    # Edge case: no meme avaliables 
+    def test_list_memes_empty(self):
+        Meme.objects.all().delete()  # Delete all memes 
+        url = reverse('meme-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 0)
+        self.assertEqual(len(response.data['results']), 0)
+        
+    # Test for checking pagaination
+    def test_list_memes_pagination(self):
+        url = reverse('meme-list')
+        # Assuming pagination is set to 2 per page
+        for i in range(5):  # Create 5 memes
+            Meme.objects.create(
+                template=self.template1, top_text=f"Top {i}", bottom_text=f"Bottom {i}", created_by=self.user1
+            )
+        response = self.client.get(url, {'page': 1})  # Request page 1
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('next', response.data)  
+        self.assertIn('previous', response.data)  
+        
+      
+    # Test for invalid pagination  
+    def test_list_memes_invalid_pagination(self):
+        url = reverse('meme-list')
+        response = self.client.get(url, {'page': 999})  # Request a non-existent page
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertIn('detail', response.data) 
+    
+    # Test meme content validation
+    def test_list_memes_structure(self):
+        url = reverse('meme-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        for meme in response.data['results']:
+            self.assertIn('id', meme)
+            self.assertIn('template', meme)
+            self.assertIn('top_text', meme)
+            self.assertIn('bottom_text', meme)
+            self.assertIn('created_by', meme)
+            self.assertIn('created_at', meme)
+
+
     
