@@ -3,14 +3,31 @@ version: '3.8'
 services:
   db:
     image: postgres:13
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    container_name: meme-generator-db-1
     environment:
-      POSTGRES_DB: meme_generator
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: meme_generator_db
+      POSTGRES_USER: anthony_postgre
+      POSTGRES_PASSWORD: Assayah19
     ports:
       - "5432:5432"
+    networks:
+      - meme-generator-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: meme-generator-pgadmin-1
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - meme-generator-network
+
 
   web:
     build: .
@@ -25,6 +42,12 @@ services:
       - DEBUG=1
       - DJANGO_SETTINGS_MODULE=memegenerator.settings
     working_dir: /app
+    networks:
+      - meme-generator-network
 
 volumes:
   postgres_data:
+
+networks:
+  meme-generator-network:
+    driver: bridge
