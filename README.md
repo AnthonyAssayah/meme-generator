@@ -65,6 +65,7 @@ You can perform actions like:
 - POST ```/api/memes/<id>/rate/``` - Rate a meme (1-5)
 - GET ```/api/memes/random/``` - Get a random meme
 - GET ```/api/memes/top/``` - Get top 10 rated memes
+- GET ```/api/memes/surprise-me``` - Get a random funny text to meme
 
 You can also interact with the Meme Generator API using ```curl``` commands directly from the Docker container. This allows you to perform actions such as listing templates, creating memes, rating memes, and fetching random or top-rated memes. Here's how you can use curl to make requests to the API.
 
