@@ -89,10 +89,10 @@ WSGI_APPLICATION = 'memegenerator.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'meme_generator',  
-        'USER': 'user',            
-        'PASSWORD': 'password',    
-        'HOST': 'db',  
+        'NAME': 'meme_generator_db',  
+        'USER': 'anthony_postgre',            
+        'PASSWORD': 'Assayah19',    
+        'HOST': 'meme-generator-db-1',  
         'PORT': '5432',
     }
 }
