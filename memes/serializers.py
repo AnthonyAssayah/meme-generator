@@ -1,12 +1,18 @@
+# Serializers for Meme, Template, User, and Rating models to convert them to JSON format for 
+# API interactions and validate incoming data.
+
 from rest_framework import serializers
 from .models import MemeTemplate, Meme, Rating
 from django.contrib.auth.models import User
 
+
+# Meme template serializer
 class MemeTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = MemeTemplate
         fields = ['id', 'name', 'image_url', 'default_top_text', 'default_bottom_text']
 
+# Meme serializer
 class MemeSerializer(serializers.ModelSerializer):
     
     # Set default values for top_text and bottom_text
@@ -39,12 +45,13 @@ class MemeSerializer(serializers.ModelSerializer):
         )
         return meme
 
-
+# Rating serializer
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
         fields = ['id', 'meme', 'user', 'score', 'created_at']
-
+        
+# User serializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
