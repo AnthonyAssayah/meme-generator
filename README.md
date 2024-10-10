@@ -33,3 +33,49 @@ and start the application using a single command (```docker-compose up```).
 - Database: PostgreSQL
 - Containerization: Docker, Docker Compose
 - Authentication: Token-based Authentication (DRF Token Auth)
+
+## Usage
+
+1- **Run the Project Locally**: After cloning the repository, you can start the application with the following command:
+
+      docker-compose up 
+
+This command will:
+
+- Build the Docker image for the Django app
+- Start the PostgreSQL database
+- Apply all migrations
+- Create the superuser
+- Start the Django development server
+
+2- **API endpoints**: 
+
+To effectively develop and document the API endpoints, you can access the Django Rest Framework's API interface at:
+
+ ``` http://127.0.0.1:8000/api/ ```
+
+This interface allows you to interact with your API endpoints in a user-friendly way, view all available endpoints, and make requests to them. 
+You can perform actions like:
+
+- GET ```/api/templates/``` - List all meme templates
+- GET ```/api/memes/``` - List all memes (with pagination)
+- POST ```/api/memes/``` - Create a new meme
+- GET ```/api/memes/<id>/``` - Retrieve a specific meme
+- POST ```/api/memes/<id>/rate/``` - Rate a meme (1-5)
+- GET ```/api/memes/random/``` - Get a random meme
+- GET ```/api/memes/top/``` - Get top 10 rated memes
+
+You can also interact with the Meme Generator API using ```curl``` commands directly from the Docker container. This allows you to perform actions such as listing templates, creating memes, rating memes, and fetching random or top-rated memes. Here's how you can use curl to make requests to the API.
+
+- ```docker exec -it meme-generator-web-1```: Executes the command inside the ```meme-generator-web-1 container```.
+- ```curl -X <METHOD>```: Executes the HTTP method (GET, POST, etc.).
+- ```http://localhost:8000/api/<endpoint>```: The API endpoint you want to interact with.
+- ```-H "Content-Type: application/json"```: Sets the content type to JSON (for POST requests).
+- ```-H "Authorization: Token <your_token>```": Passes the authentication token for the request.
+- ```-d "<data>"```: The data to be sent with the request (for POST requests).
+
+  examples:
+  - for list all memes: ```docker exec -it meme-generator-web-1 curl -X GET http://localhost:8000/api/memes/```
+  - for rate a meme: ```docker exec -it meme-generator-web-1 curl -X POST http://localhost:8000/api/memes/4/rate/ -H "Content-Type: application/json" -H "Authorization: Token a4a9644c7b8ab4540a34fc80e501e494707b89c4" -d "{\"rating\": 5}"```
+  - for get a random meme: ```docker exec -it meme-generator-web-1 curl -X GET http://localhost:8000/api/memes/random/```
+
