@@ -6,6 +6,7 @@
 - [Features](#features)
 - [Technologies](#technologies)
 - [Usage](#usage)
+- [File Structure](#file-structure)
 
 ## Introduction
 
@@ -19,7 +20,7 @@ and start the application using a single command (```docker-compose up```).
 
 ## Features
 
-- Meme Creation: Users can create memes using predefined templates. If no custom text is provided, the default text from the template is used.
+- Meme Creation: Users can create memes wit pagination using predefined templates. If no custom text is provided, the default text from the template is used.
 - Meme Rating: Users can rate memes on a scale of 1 to 5. Each user can only rate a meme once but can update their rating.
 - Top Memes: The API calculates the average rating of memes and returns the top 10 most highly-rated memes.
 - Random Meme: Users can request a random meme.
@@ -78,4 +79,35 @@ You can also interact with the Meme Generator API using ```curl``` commands dire
   - for list all memes: ```docker exec -it meme-generator-web-1 curl -X GET http://localhost:8000/api/memes/```
   - for rate a meme: ```docker exec -it meme-generator-web-1 curl -X POST http://localhost:8000/api/memes/4/rate/ -H "Content-Type: application/json" -H "Authorization: Token a4a9644c7b8ab4540a34fc80e501e494707b89c4" -d "{\"rating\": 5}"```
   - for get a random meme: ```docker exec -it meme-generator-web-1 curl -X GET http://localhost:8000/api/memes/random/```
+ 
+  While inside the Docker environment, you can run the automated tests for the Meme Generator API using the following command:
+      ``` docker-compose exec web python manage.py test ```
+
+ 
+
+    ## File Structure
+
+Within the download you'll find the following directories and files:
+
+```
+MEME-GENERATOR
+  ├── memegenerator
+  |     ├── settings.py
+  |     ├── urls.py
+  |     ├── asgi.py
+  |     └── wsgi.py
+  ├── memes
+  │   ├── migrations
+  │   ├── app.py
+  │   ├── models.py
+  │   ├── tests.py
+  │   ├── urls.py
+  │   ├── views.py
+  │   └── serializers.py
+  ├── Dockerfile
+  ├── docker-compose.yml
+  ├── server.js
+  ├── manage.py
+  └── requirements.py
+```
 
