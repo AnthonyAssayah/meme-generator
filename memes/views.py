@@ -37,7 +37,7 @@ class MemeViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     queryset = Meme.objects.all()
     serializer_class = MemeSerializer
-    pagination_class = PageNumberPagination  # This will handle pagination
+    # pagination_class = PageNumberPagination  # This will handle pagination
 
     # GET /api/memes/ - List all memes (with pagination)
     def list(self, request):

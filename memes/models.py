@@ -32,7 +32,7 @@ class Meme(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)  
 
     def __str__(self):
-        return f"Meme by {self.created_by.username} using {self.template.name}"
+        return f"Meme {self.id} by {self.created_by.username} using {self.template.name}"
 
 # Rating Model
 class Rating(models.Model):
@@ -45,4 +45,4 @@ class Rating(models.Model):
         unique_together = ('meme', 'user')  # Ensure each user can only rate a meme once
 
     def __str__(self):
-        return f"Rating {self.score} for meme by {self.user.username}"
+        return f"Rating {self.score} for meme {self.meme.id} by {self.user.username}"
