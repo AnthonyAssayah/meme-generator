@@ -14,6 +14,7 @@ from random import choice
 
 
 class MemeTemplateViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
     queryset = MemeTemplate.objects.all()
     serializer_class = MemeTemplateSerializer
 
